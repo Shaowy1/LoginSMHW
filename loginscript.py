@@ -1,36 +1,29 @@
-import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import constants
-import pyautogui
-import os
-import multiprocessing
-import subprocess
-import keyboard
-import mouse
 
-def prevent_input(duration):
-    keyboard_process = multiprocessing.Process(target=prevent_keyboard)
-    mouse_process = multiprocessing.Process(target=prevent_mouse)
-    keyboard_process.start()
-    mouse_process.start()
-    time.sleep(duration)
-    keyboard_process.close()
-    mouse_process.close()
+driver = webdriver.Chrome(executable_path=constants.PATH)
 
-def prevent_keyboard():
-    for i in range(150):
-        keyboard.block_key(i)
+def open_smhw():
+    driver.get(constants.SMHW_URL)
+    accept_terms = get_element_wait('//*[@id="onetrust-accept-btn-handler"]')
+    accept_terms.click()
+    #outlook_login_btn = get_element_wait('/html/body/div[3]/div[2]/div/div/div[1]/form/div[5]/div/button[1]/span')
+    #outlook_login_btn.click()
 
-def prevent_mouse():
-    while True:
-        mouse.move(1, 0, absolute=True, duration=0)
+def main():
+    open_smhw()
 
-def login():
-    subprocess.call(r"C:\Program Files\Google\Chrome\Application\chrome.exe")
-    time.sleep(0.5)
-    pyautogui.click(constants.PROFILE[0], constants.PROFILE[1])
-    time.sleep(1)
-    pyautogui.click(constants.GUEST[0], constants.GUEST[1])
-    pyautogui.typewrite('https://www.satchelone.com/login')
-    pyautogui.press('enter')
+def get_element_wait(xpath):
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, xpath))
+        )
+        return element
+    finally:
+        driver.close()
 
-login()
+if __name__ == "__main__":
+    main()
